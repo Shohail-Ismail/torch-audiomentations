@@ -24,28 +24,11 @@ class RMSNormalization(BaseWaveformTransform):
         mode: str = "per_example",
         p: float = 0.5,
         p_mode: Optional[str] = None,
-        sample_rate: Optional[int] = None,
-        target_rate: Optional[int] = None,
-        output_type: Optional[str] = None,
     ):
-        """
-        Args:
-          target_level_dbfs (float): Desired RMS in dBFS.
-          eps (float): Small constant for numeric stability.
-          mode (str): “per_example”, “per_channel” or “per_batch”.
-          p (float): Probability of applying the transform (default 0.5).
-          p_mode (Optional[str]): Secondary probability mode.
-          sample_rate (Optional[int]): Sample rate, if required.
-          target_rate (Optional[int]): Target sample rate.
-          output_type (Optional[str]): “tensor” or “dict” output.
-        """
         super().__init__(
             mode = mode,
             p = p,
             p_mode = p_mode,
-            sample_rate = sample_rate,
-            target_rate = target_rate,
-            output_type = output_type,
         )
         
         # Convert target dBFS to linear amplitude
