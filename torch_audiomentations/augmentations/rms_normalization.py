@@ -4,15 +4,12 @@ from typing import Optional
 
 from ..core.transforms_interface import BaseWaveformTransform
 from ..utils.object_dict import ObjectDict
+from ..utils import db_to_amplitude
 
 class RMSNormalization(BaseWaveformTransform):
     
     """
     Adjusts gain so signal’s overall RMS matches `target_level_dbfs`
-
-    Args:
-      target_level_dbfs (float): desired RMS in dBFS.
-      eps (float): small constant for numeric stability (default 1e-9)
     """
     
     supports_multichannel = True
@@ -20,15 +17,39 @@ class RMSNormalization(BaseWaveformTransform):
     supports_target = False
     requires_target = False
 
-    def __init__(self,
-                 target_level_dbfs: float,
-                 eps: float = 1e-9,
-                 p: float = 1.0,
-                 output_type: str = "dict"):
-        # p = probability, output_type chooses dict vs tensor
-        super().__init__(p = p, output_type = output_type)
-        # Convert dBFS to linear gain
-        self.target_amp = 10 ** (target_level_dbfs / 20.0)
+    def __init__(
+        self,
+        target_level_dbfs: float,
+        eps: float = 1e-9,
+        mode: str = "per_example",
+        p: float = 0.5,
+        p_mode: Optional[str] = None,
+        sample_rate: Optional[int] = None,
+        target_rate: Optional[int] = None,
+        output_type: Optional[str] = None,
+    ):
+        """
+        Args:
+          target_level_dbfs (float): Desired RMS in dBFS.
+          eps (float): Small constant for numeric stability.
+          mode (str): “per_example”, “per_channel” or “per_batch”.
+          p (float): Probability of applying the transform (default 0.5).
+          p_mode (Optional[str]): Secondary probability mode.
+          sample_rate (Optional[int]): Sample rate, if required.
+          target_rate (Optional[int]): Target sample rate.
+          output_type (Optional[str]): “tensor” or “dict” output.
+        """
+        super().__init__(
+            mode = mode,
+            p = p,
+            p_mode = p_mode,
+            sample_rate = sample_rate,
+            target_rate = target_rate,
+            output_type = output_type,
+        )
+        
+        # Convert target dBFS to linear amplitude
+        self.target_amp = db_to_amplitude(target_level_dbfs)
         self.eps = eps
 
     def apply_transform(
