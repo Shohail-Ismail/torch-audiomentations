@@ -4,7 +4,6 @@ from typing import Optional
 
 from ..core.transforms_interface import BaseWaveformTransform
 from ..utils.object_dict import ObjectDict
-from ..utils import db_to_amplitude
 
 class RMSNormalization(BaseWaveformTransform):
     
@@ -22,17 +21,19 @@ class RMSNormalization(BaseWaveformTransform):
         target_level_dbfs: float,
         eps: float = 1e-9,
         mode: str = "per_example",
-        p: float = 0.5,
+        p: float = 1.0,
         p_mode: Optional[str] = None,
+        output_type: Optional[str] = "dict",
     ):
         super().__init__(
             mode = mode,
             p = p,
             p_mode = p_mode,
+            output_type=output_type
         )
         
         # Convert target dBFS to linear amplitude
-        self.target_amp = db_to_amplitude(target_level_dbfs)
+        self.target_amp = 10 ** (target_level_dbfs / 20.0)
         self.eps = eps
 
     def apply_transform(
